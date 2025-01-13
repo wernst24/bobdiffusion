@@ -11,7 +11,7 @@ sys.tracebacklimit = 0
 from modules import *
 
 st.set_page_config(
-    page_title="BobTextureAnalysis",
+    page_title="evil BobTextureAnalysis",
     page_icon="🔬",
     layout="wide",
 )
@@ -21,7 +21,7 @@ col1, col2 = st.columns(2)
 # col1 should be for uploading image only: upload image, choose downscaling factor, and then preview at bottom.
 with col1:
     # title for form
-    st.markdown("# BobTextureAnalysis")
+    st.markdown("# filter testing")
 
     # Everything in this block will wait until submitted - it should contain uploading the images and infrequently changed parameters - initial downscale, etc.
     with st.form("form1", enter_to_submit=False, clear_on_submit=False):
@@ -64,46 +64,37 @@ with col1:
         st.write("Processing options")
 
         # These don't need checking for NaN, because they have default values
-        st.session_state.inner_sigma = st.number_input(value=1, min_value=1, max_value=100, step=1, label="sigma value (1 to 100 pixels)",
-        help="Smaller values will emphasize higher frequecy detail, while larger values will focus on larger detail. Find what looks cool!")
+        st.session_state.ksize = st.number_input(value=1, min_value=1, max_value=9, step=2, label="kernel diameter")
 
-        st.session_state.angle_phase_shift = st.number_input("Angle phase shift (0 to 180 degrees)", min_value=0, max_value=180, step=1)
+        st.session_state.spaceSigma = st.number_input(value=1, min_value=1, max_value=100, step=1, label="space sigma")
 
-        st.session_state.epsilon = st.number_input(min_value=1e-8, max_value=1.0, value=1e-8, label="epsilon (increasing can reduce coherence instability for near-constant reigons)")
+        st.session_state.colorSigma = st.number_input(value=1, min_value=1, max_value=100, step=1, label="color sigma")
 
-        st.session_state.invert = st.checkbox(label="Invert image?", value=False)
 # col2 should be for visualizing processed images, and should have everything update live.
 # Add dropdown menu for which layers to view: intensity, angle, and coherence - done
 with col2:
     # Selection for which image to view
-    imageToDisplay = st.selectbox("Image to display:", ("Intensity, Coherence, and Angle", "Coherence and Angle only", "Coherence only", "Angle only (black & white)"))
+    imageToDisplay = st.selectbox("Image to display:", ("Default image", "Gaussian filter", "Bilateral filter"))
     if st.session_state.raw_image_gray is not None:
         raw_image_gray = st.session_state.raw_image_gray
+        gfilt = cv.GaussianBlur(raw_image_gray, (st.session_state.ksize, st.session_state.ksize), st.session_state.spaceSigma)
+        bfilt = cv.bilateralFilter(raw_image_gray.astype(np.float32), st.session_state.ksize, st.session_state.colorSigma, st.session_state.spaceSigma)
+        # # calculate coherence and angle at a given sigma inner scale
+        # coherence, two_phi = coh_ang_calc(raw_image_gray, sigma_inner=st.session_state.inner_sigma, epsilon=st.session_state.epsilon)
+        # two_phi *= -1 # flip direction of increasing angles to CCW
 
-        # calculate coherence and angle at a given sigma inner scale
-        coherence, two_phi = coh_ang_calc(raw_image_gray, sigma_inner=st.session_state.inner_sigma, epsilon=st.session_state.epsilon)
-        two_phi *= -1 # flip direction of increasing angles to CCW
         
-        # This feels inefficient
-        if "coh_ang" not in st.session_state:
-            st.session_state.coh_ang = None
-        st.session_state.coh_ang = (coherence, two_phi)
-
-        all_img = orient_hsv(raw_image_gray, coherence, two_phi, mode='all', angle_phase=st.session_state.angle_phase_shift, invert = st.session_state.invert)
-        coh_img = orient_hsv(raw_image_gray, coherence, two_phi, mode='coherence')
-        ang_img = orient_hsv(raw_image_gray, coherence, two_phi, mode='angle', angle_phase=st.session_state.angle_phase_shift)
-        ang_img_bw = orient_hsv(raw_image_gray, coherence, two_phi, mode="angle_bw", angle_phase=st.session_state.angle_phase_shift)
     
     # Display image based on user selection
     if st.session_state.raw_image_gray is not None:
-        if imageToDisplay == "Intensity, Coherence, and Angle":
-            image_to_show = all_img
-        elif imageToDisplay == "Coherence and Angle only":
-            image_to_show = ang_img
-        elif imageToDisplay == "Coherence only":
-            image_to_show = coh_img
+        if imageToDisplay == "Default image":
+            image_to_show = raw_image_gray
+        elif imageToDisplay == "Gaussian filter":
+            image_to_show = gfilt
+        elif imageToDisplay == "Bilateral filter":
+            image_to_show = bfilt
         else:
-            image_to_show = ang_img_bw
+            assert False, "image to display selector somehow went horribly wrong"
         st.image(image_to_show, use_container_width=True)
     else:
         st.write("No image uploaded yet - click \"Analyze\"?")
