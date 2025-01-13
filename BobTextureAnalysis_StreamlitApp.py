@@ -64,7 +64,7 @@ with col1:
         st.write("Processing options")
 
         # These don't need checking for NaN, because they have default values
-        st.session_state.ksize = st.number_input(value=1, min_value=1, max_value=9, step=2, label="kernel diameter")
+        st.session_state.ksize = st.number_input(value=1, min_value=1, max_value=51, step=2, label="kernel diameter")
 
         st.session_state.spaceSigma = st.number_input(value=1, min_value=1, max_value=100, step=1, label="space sigma")
 
