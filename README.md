@@ -42,3 +42,7 @@ TODO:
 - Do runtime analysis to find bottlenecks
 
 - Find out if streamlit gpu acceleration exists
+
+# Bilateral Filter
+
+Using the coherence calculation already implemented, I want to investigate using coherence in a bilateral filtering implementation. Hopefully this can provide useful regulation for further image processing, or at least look cool.
