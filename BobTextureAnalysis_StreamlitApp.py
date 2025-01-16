@@ -66,9 +66,9 @@ with col1:
         # These don't need checking for NaN, because they have default values
         st.session_state.ksize = st.number_input(value=1, min_value=1, max_value=51, step=2, label="kernel diameter")
 
-        st.session_state.spaceSigma = st.number_input(value=1, min_value=1, max_value=100, step=1, label="space sigma")
+        st.session_state.spaceSigma = st.number_input(value=1.0, min_value=.01, max_value=100.0, step=.1, label="space sigma")
 
-        st.session_state.colorSigma = st.number_input(value=1, min_value=1, max_value=100, step=1, label="color sigma")
+        st.session_state.colorSigma = st.number_input(value=1.0, min_value=.01, max_value=100.0, step=.1, label="color sigma")
 
 # col2 should be for visualizing processed images, and should have everything update live.
 # Add dropdown menu for which layers to view: intensity, angle, and coherence - done
