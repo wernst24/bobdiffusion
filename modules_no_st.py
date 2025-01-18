@@ -2,12 +2,11 @@
 import cv2 as cv
 import numpy as np
 from skimage.filters import gaussian
-import streamlit as st
 
 def sobel(image):
     return cv.Sobel(image, cv.CV_64F, 1, 0, ksize=5), cv.Sobel(image, cv.CV_64F, 0, 1, ksize=5)
 
-@st.cache_data
+
 def structure_tensor_calc(image):
     I_x, I_y = sobel(image)
 
@@ -22,7 +21,7 @@ def kval_gaussian(k_20_re, k_20_im, k_11, sigma):
     max_std = 3.0 # cut off gaussian after 3 standard deviations
     return gaussian(k_20_re, sigma=sigma, truncate=max_std), gaussian(k_20_im, sigma=sigma, truncate=max_std), gaussian(k_11, sigma=sigma, truncate=max_std)
 
-@st.cache_data
+
 def coh_ang_calc(image, sigma_inner=2, epsilon=1e-3, kernel_radius=3):
     # image: 2d grayscale image, perchance already mean downscaled a bit
     # sigma_outer: sigma for gradient detection
@@ -41,7 +40,7 @@ def coh_ang_calc(image, sigma_inner=2, epsilon=1e-3, kernel_radius=3):
 
 
 # get rbg of image, coherence, and angle
-@st.cache_data
+
 def orient_hsv(image, coherence_image, angle_img, mode="all", angle_phase=0, invert=False):
     angle_img  = (angle_img - angle_phase*np.pi/90.0) % (np.pi * 2)
 
