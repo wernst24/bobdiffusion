@@ -71,3 +71,18 @@ def orient_hsv(image, coherence_image, angle_img, mode="all", angle_phase=0, inv
         assert False, "Invalid mode"
 
     return cv.cvtColor((hsv_image * 255).astype(np.uint8), cv.COLOR_HSV2RGB)
+
+# returns a non-normalized array of size (num_bins), containing weighted coherence values
+# expecting ang to be [-np.pi, np.pi]
+def weightedHistogram(coh, ang, num_bins):
+    bin_width = np.pi*2/num_bins
+    print(bin_width)
+    ang = np.floor((ang + np.pi)/bin_width) # should be from 0 to num_bins
+    print(ang, "ang min ang max \n\n\n", ang.min(), ang.max(), len(np.unique(ang)))
+    cohang = np.stack((coh, ang), axis=-1)
+    x, y, _ = cohang.shape
+    flat = cohang.reshape((x*y, 2))
+    flat = flat[np.argsort(flat[:, 1])]
+    hist = np.zeros((num_bins))
+    np.add.at(hist, flat[:, 1].astype(np.int16), flat[:, 0])
+    return hist
