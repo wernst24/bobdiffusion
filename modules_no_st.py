@@ -76,9 +76,9 @@ def orient_hsv(image, coherence_image, angle_img, mode="all", angle_phase=0, inv
 # expecting ang to be [-np.pi, np.pi]
 def weightedHistogram(coh, ang, num_bins):
     bin_width = np.pi*2/num_bins
-    print(bin_width)
+    # print(bin_width)
     ang = np.floor((ang + np.pi)/bin_width) # should be from 0 to num_bins
-    print(ang, "ang min ang max \n\n\n", ang.min(), ang.max(), len(np.unique(ang)))
+    # print(ang, "ang min ang max \n\n\n", ang.min(), ang.max(), len(np.unique(ang)))
     cohang = np.stack((coh, ang), axis=-1)
     x, y, _ = cohang.shape
     flat = cohang.reshape((x*y, 2))
