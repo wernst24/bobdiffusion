@@ -1,5 +1,7 @@
 import streamlit as st
 import numpy as np
+import matplotlib
+matplotlib.use("agg")  # Use non-GUI backend
 import matplotlib.pyplot as plt
 import sys
 from skimage import color
