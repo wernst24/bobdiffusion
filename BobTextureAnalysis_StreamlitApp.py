@@ -83,7 +83,7 @@ with col1:
 # col2 should be for visualizing processed images, and should have everything update live.
 # Add dropdown menu for which layers to view: intensity, angle, and coherence - done
 with col2:
-    _lock = RendererAgg.lock
+    # _lock = RendererAgg.lock
     
     
     
@@ -93,16 +93,16 @@ with col2:
         weighted_hist = weightedHistogram(coh, ang, st.session_state.num_bins)
         blurred = gaussian_filter1d(weighted_hist, sigma=st.session_state.histogram_blur_sigma ,mode='wrap')
 
-        with _lock:
+        # with _lock:
             
-            fig, ax = plt.subplots()
-            ax.bar(range(st.session_state.num_bins), weighted_hist, width=1, color="gray")
-            ax.set_title("Coherence-Weighted Histogram of Angles")
-            ax.set_ylabel("Sum of coherence (roughly counts)")
-            ax.set_xlabel("Bin number (roughly angle) - 0 is vertical, increasing CW")
-            ax.plot(range(st.session_state.num_bins), blurred, c='black')
-            # ax.set_xticks()
-            st.pyplot(fig)
+        fig, ax = plt.subplots()
+        ax.bar(range(st.session_state.num_bins), weighted_hist, width=1, color="gray")
+        ax.set_title("Coherence-Weighted Histogram of Angles")
+        ax.set_ylabel("Sum of coherence (roughly counts)")
+        ax.set_xlabel("Bin number (roughly angle) - 0 is vertical, increasing CW")
+        ax.plot(range(st.session_state.num_bins), blurred, c='black')
+        # ax.set_xticks()
+        st.pyplot(fig)
         
         st.text((ang.min(), ang.max()))
         st.image(orient_hsv(st.session_state.raw_image_gray, coh, ang, mode='angle'), use_container_width=True)
