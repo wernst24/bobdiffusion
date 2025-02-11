@@ -96,11 +96,11 @@ with col2:
         # with _lock:
             
         fig, ax = plt.subplots()
-        ax.bar(range(st.session_state.num_bins), weighted_hist, width=1, color="gray")
+        ax.bar(range(st.session_state.num_bins), weighted_hist, width=1, color=matplotlib.colormaps['hsv'](np.linspace(0, 1, st.session_state.num_bins)))
         ax.set_title("Coherence-Weighted Histogram of Angles")
         ax.set_ylabel("Sum of coherence (roughly counts)")
-        ax.set_xlabel("Bin number (roughly angle) - 0 is vertical, increasing CW")
-        ax.plot(range(st.session_state.num_bins), blurred, c='black')
+        ax.set_xlabel("Bin number (roughly angle) - 0 vertical, increasing CCW")
+        ax.plot(range(st.session_state.num_bins), blurred, c='black', alpha = 0.5)
         # ax.set_xticks()
         st.pyplot(fig)
         
