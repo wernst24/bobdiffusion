@@ -71,13 +71,15 @@ with col1:
             # These don't need checking for NaN, because they have default values
             # st.session_state.ksize = st.number_input(value=1, min_value=1, max_value=51, step=2, label="kernel diameter")
 
-            st.session_state.histogram_blur_sigma = st.number_input(value=1.0, min_value=.01, max_value=100.0, step=.1, label="histogram blur sigma")
+            st.session_state.coherence_gamma = st.number_input(value=1.0, min_value=.5, max_value=4.0, step=.01, label="coherence gamma")
+
+            st.session_state.histogram_blur_sigma = st.number_input(value=0.0, min_value=0.0, max_value=100.0, step=.1, label="histogram blur sigma")
 
             st.session_state.innerSigma = st.number_input(value=1.0, min_value=.01, max_value=10.0, step=.1, label="inner sigma")
 
             st.session_state.epsilon = st.number_input(value=1e-8, min_value=1e-8, max_value=1.0, step=.01, label="epsilon")
 
-            st.session_state.num_bins = st.number_input(value=100, min_value=100, max_value=1000, step=1, label="num_bins")
+            st.session_state.num_bins = st.number_input(value=180, min_value=180, max_value=5000, step=1, label="num_bins")
             submit_button_2 = st.form_submit_button("Confirm options")
 
 # col2 should be for visualizing processed images, and should have everything update live.
@@ -90,26 +92,27 @@ with col2:
     if st.session_state.raw_image_gray is not None:
         raw_image_gray = st.session_state.raw_image_gray
         coh, ang = coh_ang_calc(raw_image_gray, st.session_state.innerSigma, st.session_state.epsilon)
-        weighted_hist = weightedHistogram(coh, ang, st.session_state.num_bins)
-        blurred = gaussian_filter1d(weighted_hist, sigma=st.session_state.histogram_blur_sigma ,mode='wrap')
+        coh_gammaified = np.power(coh, st.session_state.coherence_gamma)
+        weighted_hist = weightedHistogram(coh_gammaified, ang, st.session_state.num_bins)
+        blurred = gaussian_filter1d(weighted_hist, sigma=st.session_state.histogram_blur_sigma ,mode='wrap') if st.session_state.histogram_blur_sigma != 0 else weighted_hist
 
         # with _lock:
             
         fig, ax = plt.subplots()
-        ax.bar(range(st.session_state.num_bins), weighted_hist, width=1, color=matplotlib.colormaps['hsv'](np.linspace(0, 1, st.session_state.num_bins)))
+        ax.bar(np.linspace(0, 180, st.session_state.num_bins), blurred, width=1, color=matplotlib.colormaps['hsv'](np.linspace(0, 1, st.session_state.num_bins)))
         ax.set_title("Coherence-Weighted Histogram of Angles")
         ax.set_ylabel("Sum of coherence (roughly counts)")
-        ax.set_xlabel("Bin number (roughly angle) - 0 vertical, increasing CCW")
-        ax.plot(range(st.session_state.num_bins), blurred, c='black', alpha = 0.5)
+        ax.set_xlabel("Angle [deg] - 0 vertical, increasing CCW")
+        # ax.plot(np.linspace(0, 180, st.session_state.num_bins), blurred, c='black', alpha = 0.5)
         # ax.set_xticks()
         st.pyplot(fig)
         
-        st.text((ang.min(), ang.max()))
+        # st.text((ang.min(), ang.max()))
         st.image(orient_hsv(st.session_state.raw_image_gray, coh, ang, mode='angle'), use_container_width=True)
 
         st.download_button(
             "Download weighted histogram as csv",
-            pd.DataFrame(weighted_hist).to_csv(index=False).encode('utf-8'),
+            pd.DataFrame(blurred).to_csv(index=False).encode('utf-8'),
             "weighted_histogram.csv",
             "text/csv",
             key='download-csv'
