@@ -110,11 +110,13 @@ with col2:
         # st.text((ang.min(), ang.max()))
         st.image(orient_hsv(st.session_state.raw_image_gray, coh, ang, mode='angle'), use_container_width=True)
 
+        file_name = st.text_input("file name for download", value="unnamed_angle_histogram")
+
         st.download_button(
-            "Download weighted histogram as csv",
+            "Download " + file_name + ".csv",
             pd.DataFrame(blurred).to_csv(index=False).encode('utf-8'),
-            "weighted_histogram.csv",
-            "text/csv",
+            file_name + ".csv",
+            "test/csv",
             key='download-csv'
         )
     else:
