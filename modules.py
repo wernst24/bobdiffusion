@@ -3,13 +3,30 @@ import cv2 as cv
 import numpy as np
 from skimage.filters import gaussian
 import streamlit as st
+import scipy.ndimage as ndi
 
-def sobel(image):
-    return cv.Sobel(image, cv.CV_64F, 1, 0, ksize=5), cv.Sobel(image, cv.CV_64F, 0, 1, ksize=5)
+
+
+def ddx_gaussian_convolve(image : np.ndarray, sigma = -1, sigma_to_ydim_ratio = -1, truncate=3, mode = 'l2'):
+    if sigma == -1:
+        if sigma_to_ydim_ratio == -1:
+            sigma = 1
+        else:
+            sigma = image.shape[0] * sigma_to_ydim_ratio
+    return ndi.gaussian_filter(image, sigma, order=(0, 1), truncate=truncate, mode='reflect'), ndi.gaussian_filter(image, sigma, order=(1, 0), truncate=truncate, mode='wrap') # ix, iy
+    
+    # padded_image = cv.copyMakeBorder(image, kernel_radius, kernel_radius, kernel_radius, kernel_radius, cv.BORDER_WRAP)
+    # ddx, ddy = generate_ddx_gaussian_kernels(sigma, kernel_radius)
+    # padded_image_window = np.lib.stride_tricks.sliding_window_view(padded_image, (2 * kernel_radius + 1, 2 * kernel_radius + 1))
+    ix = (padded_image_window * ddx).sum(axis=(2, 3))
+    iy = (padded_image_window * ddy).sum(axis=(2, 3))
+    return ix, iy
+
+
 
 @st.cache_data
-def structure_tensor_calc(image):
-    I_x, I_y = sobel(image)
+def structure_tensor_calc(image, sigma_to_ydim_ratio):
+    I_x, I_y = ddx_gaussian_convolve(image, sigma_to_ydim_ratio=sigma_to_ydim_ratio, truncate=2)
 
     # structure tensor
     mu_20 = I_x ** 2
@@ -23,14 +40,14 @@ def kval_gaussian(k_20_re, k_20_im, k_11, sigma):
     return gaussian(k_20_re, sigma=sigma, truncate=max_std), gaussian(k_20_im, sigma=sigma, truncate=max_std), gaussian(k_11, sigma=sigma, truncate=max_std)
 
 @st.cache_data
-def coh_ang_calc(image, sigma_inner=2, epsilon=1e-3, kernel_radius=3):
+def coh_ang_calc(image, sigma_to_ydim_ratio, sigma_inner=2, epsilon=1e-3, kernel_radius=3):
     # image: 2d grayscale image, perchance already mean downscaled a bit
     # sigma_outer: sigma for gradient detection
     # sigma_inner: sigma controlling bandwidth of angles detected
     # epsilon: prevent div0 error for coherence
     # kernel_radius: kernel size for gaussians - kernel will be 2*kernel_radius + 1 wide
 
-    k_20_re, k_20_im, k_11 = structure_tensor_calc(image)
+    k_20_re, k_20_im, k_11 = structure_tensor_calc(image, sigma_to_ydim_ratio)
 
     # this is sampling local area with w(p)
     k_20_re, k_20_im, k_11 = kval_gaussian(k_20_re, k_20_im, k_11, sigma_inner)

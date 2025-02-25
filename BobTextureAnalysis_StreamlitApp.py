@@ -55,6 +55,7 @@ with col1:
             cv_image_rescaled = rescale(cv_image_gray, rescale_factor, anti_aliasing=True)
 
             st.session_state.raw_image_gray = cv_image_rescaled
+            # maybe make dtype f16 instead of f64
         
         submit_button = st.form_submit_button("Analyze image")
     
@@ -63,6 +64,7 @@ with col1:
         st.write("Input image (grayscale)")
         if st.session_state.raw_image_gray is not None:
             st.image(st.session_state.raw_image_gray, use_container_width=True)
+            st.text(st.session_state.raw_image_gray.shape)
     
     with col1b:
         with st.form("form2", enter_to_submit = False, clear_on_submit = False):
@@ -71,15 +73,19 @@ with col1:
             # These don't need checking for NaN, because they have default values
             # st.session_state.ksize = st.number_input(value=1, min_value=1, max_value=51, step=2, label="kernel diameter")
 
-            st.session_state.coherence_gamma = st.number_input(value=1.0, min_value=.5, max_value=4.0, step=.01, label="coherence gamma")
+            st.session_state.coherence_gamma = st.number_input(value=1.0, min_value=.5, max_value=4.0, step=0.0, label="coherence gamma", format="%.6f")
 
-            st.session_state.histogram_blur_sigma = st.number_input(value=0.0, min_value=0.0, max_value=100.0, step=.1, label="histogram blur sigma")
+            st.session_state.histogram_blur_sigma = st.number_input(value=0.0, min_value=0.0, max_value=100.0, step=0.0, label="histogram blur sigma", format="%.6f")
 
-            st.session_state.innerSigma = st.number_input(value=1.0, min_value=.01, max_value=10.0, step=.1, label="inner sigma")
+            st.markdown("this bit is for outer sigma - know image dimensions. Sigma for convolution is calculated with \"sigma = image.shape[0] * sigma_to_ydim_ratio\". Calculation *should* be (sigma [m])/(image ydim [m])")
 
-            st.session_state.epsilon = st.number_input(value=1e-8, min_value=1e-8, max_value=1.0, step=.01, label="epsilon")
+            st.session_state.sigma_to_ydim_ratio = st.number_input(value=0.001, min_value=0.0000001, max_value=100.0, step=0.0, label="sigma to ydim ratio", format="%.6f")
 
-            st.session_state.num_bins = st.number_input(value=180, min_value=180, max_value=5000, step=1, label="num_bins")
+            st.session_state.innerSigma = st.number_input(value=1.0, min_value=.01, max_value=10.0, step=0.0, label="inner sigma", format="%.6f")
+
+            st.session_state.epsilon = st.number_input(value=1e-8, min_value=1e-8, max_value=1.0, step=-1.0, label="epsilon", format="%.6f")
+
+            st.session_state.num_bins = st.number_input(value=180, min_value=180, max_value=5000, step=0, label="num_bins", format="%.6f")
             submit_button_2 = st.form_submit_button("Confirm options")
 
 # col2 should be for visualizing processed images, and should have everything update live.
@@ -91,7 +97,9 @@ with col2:
     
     if st.session_state.raw_image_gray is not None:
         raw_image_gray = st.session_state.raw_image_gray
-        coh, ang = coh_ang_calc(raw_image_gray, st.session_state.innerSigma, st.session_state.epsilon)
+        st.markdown("before changed bit")
+        coh, ang = coh_ang_calc(raw_image_gray, st.session_state.sigma_to_ydim_ratio, st.session_state.innerSigma, st.session_state.epsilon) # this is the important bit
+        st.markdown("after changed bit")
         coh_gammaified = np.power(coh, st.session_state.coherence_gamma)
         weighted_hist = weightedHistogram(coh_gammaified, ang, st.session_state.num_bins)
         blurred = gaussian_filter1d(weighted_hist, sigma=st.session_state.histogram_blur_sigma ,mode='wrap') if st.session_state.histogram_blur_sigma != 0 else weighted_hist
@@ -109,6 +117,10 @@ with col2:
         
         # st.text((ang.min(), ang.max()))
         st.image(orient_hsv(st.session_state.raw_image_gray, coh, ang, mode='angle'), use_container_width=True)
+        st.image(orient_hsv(st.session_state.raw_image_gray, coh, ang, mode='coherence'), use_container_width=True)
+        st.image(orient_hsv(st.session_state.raw_image_gray, coh, ang, mode='angle_bw'), use_container_width=True)
+        st.image(orient_hsv(st.session_state.raw_image_gray, coh, ang, mode='all'), use_container_width=True)
+        st.text(coh.max())
 
         file_name = st.text_input("file name for download", value="unnamed_angle_histogram")
 
