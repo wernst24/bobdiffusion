@@ -103,3 +103,25 @@ def weightedHistogram(coh, ang, num_bins):
     hist = np.zeros((num_bins))
     np.add.at(hist, flat[:, 1].astype(np.int16), flat[:, 0])
     return hist
+
+def downscale_coh_ang(coherence, angle, k):
+    (h, w) = coherence.shape
+    h_small = h//k
+    w_small = w//k
+
+    coherence_clipped = coherence[:h_small * k, :w_small * k]
+    angle_clipped = angle[:h_small * k, :w_small * k]
+
+    coherence_small = coherence_clipped.reshape(h_small, k, w_small, k).mean(axis=(1, 3))
+    
+    angle_reshaped = angle_clipped.reshape(h_small, k, w_small, k)
+
+    max_col_indices = coherence_clipped.reshape(h_small, k, w_small, k).max(axis=1).argmax(axis=2) # shape (h_small, k, w_small)
+    max_row_indices = coherence_clipped.reshape(h_small, k, w_small, k).max(axis=3).argmax(axis=1)
+
+
+    angle_small = angle_reshaped[np.arange(h_small)[:, None], max_row_indices, np.arange(w_small), max_col_indices]
+    # print(h_small, w_small)
+    # print(max_row_indices.shape, max_col_indices.shape, angle_small.shape)
+
+    return coherence_small, angle_small

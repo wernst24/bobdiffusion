@@ -23,6 +23,7 @@ st.set_page_config(
 col1, col2 = st.columns(2)
 
 # col1 should be for uploading image only: upload image, choose downscaling factor, and then preview at bottom.
+# nevermind
 with col1:
     # title for form
     st.markdown("# weighted histogram")
@@ -54,6 +55,8 @@ with col1:
             # rescale with skimage
             cv_image_rescaled = rescale(cv_image_gray, rescale_factor, anti_aliasing=True)
 
+            #TODO: add crop
+
             st.session_state.raw_image_gray = cv_image_rescaled
             # maybe make dtype f16 instead of f64
         
@@ -64,7 +67,7 @@ with col1:
         st.write("Input image (grayscale)")
         if st.session_state.raw_image_gray is not None:
             st.image(st.session_state.raw_image_gray, use_container_width=True)
-            st.text(st.session_state.raw_image_gray.shape)
+            st.text("Image shape: " + str(st.session_state.raw_image_gray.shape))
     
     with col1b:
         with st.form("form2", enter_to_submit = False, clear_on_submit = False):
@@ -90,12 +93,14 @@ with col1:
             st.session_state.num_bins = st.number_input(value=180, min_value=180, max_value=5000, step=0, label="num_bins")
             submit_button_2 = st.form_submit_button("Confirm options")
 
+    # still col 1
+    
+
 # col2 should be for visualizing processed images, and should have everything update live.
 # Add dropdown menu for which layers to view: intensity, angle, and coherence - done
 with col2:
-    # _lock = RendererAgg.lock
-    
-    
+
+    imageToDisplay = st.selectbox("Image to display:", ("Intensity, Coherence, and Angle", "Coherence and Angle only", "Coherence only", "Angle only (black & white)"))
     
     if st.session_state.raw_image_gray is not None:
         raw_image_gray = st.session_state.raw_image_gray
@@ -106,8 +111,6 @@ with col2:
         weighted_hist = weightedHistogram(coh_gammaified, ang, st.session_state.num_bins)
         blurred = gaussian_filter1d(weighted_hist, sigma=st.session_state.histogram_blur_sigma ,mode='wrap') if st.session_state.histogram_blur_sigma != 0 else weighted_hist
 
-        # with _lock:
-            
         fig, ax = plt.subplots()
         ax.bar(np.linspace(0, 180, st.session_state.num_bins), blurred, width=1, color=matplotlib.colormaps['hsv'](np.linspace(0, 1, st.session_state.num_bins)))
         ax.set_title("Coherence-Weighted Histogram of Angles")
@@ -118,11 +121,45 @@ with col2:
         st.pyplot(fig)
         
         # st.text((ang.min(), ang.max()))
-        st.image(orient_hsv(st.session_state.raw_image_gray, coh, ang, mode='angle'), use_container_width=True)
-        st.image(orient_hsv(st.session_state.raw_image_gray, coh, ang, mode='coherence'), use_container_width=True)
-        st.image(orient_hsv(st.session_state.raw_image_gray, coh, ang, mode='angle_bw'), use_container_width=True)
-        st.image(orient_hsv(st.session_state.raw_image_gray, coh, ang, mode='all'), use_container_width=True)
+        all_img = orient_hsv(raw_image_gray, coh, ang, mode='all')
+        ang_img = orient_hsv(raw_image_gray, coh, ang, mode='angle')
+        coh_img = orient_hsv(raw_image_gray, coh, ang, mode='coherence')
+        ang_img_bw = orient_hsv(raw_image_gray, coh, ang, mode='angle_bw')
         # st.text(coh.max())
+
+        st.text("outer sigma in pixels: " + str(st.session_state.sigma_to_ydim_ratio * raw_image_gray.shape[0]) + (" (should be at least .5px)"))
+
+        if imageToDisplay == "Intensity, Coherence, and Angle":
+            image_to_show = all_img
+        elif imageToDisplay == "Coherence and Angle only":
+            image_to_show = ang_img
+        elif imageToDisplay == "Coherence only":
+            image_to_show = coh_img
+        else:
+            image_to_show = ang_img_bw
+        st.image(image_to_show, use_container_width=True)
+
+        
+        k = st.number_input("choose k for (k by k) block reduce", min_value=1, max_value=100, value=1, step=1)
+        (h, w) = raw_image_gray.shape
+        raw_image_gray_small = raw_image_gray[:h//k * k, :w//k * k].reshape(h//k, k, w//k, k).mean(axis=(1, 3))
+        coherence_small, two_phi_small = downscale_coh_ang(coh, ang, k)
+
+        all_img_small = orient_hsv(raw_image_gray_small, coherence_small, two_phi_small, mode='all')
+        coh_img_small = orient_hsv(raw_image_gray_small, coherence_small, two_phi_small, mode='coherence')
+        ang_img_small = orient_hsv(raw_image_gray_small, coherence_small, two_phi_small, mode='angle')
+        ang_img_bw_small = orient_hsv(raw_image_gray_small, coherence_small, two_phi_small, mode="angle_bw")
+
+        if imageToDisplay == "Intensity, Coherence, and Angle":
+            image_to_show2 = all_img_small
+        elif imageToDisplay == "Coherence and Angle only":
+            image_to_show2 = ang_img_small
+        elif imageToDisplay == "Coherence only":
+            image_to_show2 = coh_img_small
+        else:
+            image_to_show2 = ang_img_bw_small
+        st.image(image_to_show2, use_container_width=False)
+
 
         file_name = st.text_input("file name for download", value="unnamed_angle_histogram")
 
