@@ -78,7 +78,7 @@ with col2:
             "Intensity, Coherence, and Angle",
             "Coherence and Angle only",
             "Coherence only",
-            "Angle only (black & white)",
+            "Angle only",
         ),
     )
 
