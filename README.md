@@ -1,7 +1,30 @@
 # bobtextureanalysis
-This is a web app for analyzing the fiber structure of images, intended to be used with drumheads. In order to use the application, go to bobtextureanalysis.streamlit.app. Currently, the app is very inefficient and not well designed, so please keep file submissions small. After uploading an image, click "Analyze", and four images should appear in the right column: the original, HSV encoded orientation & coherence, coherence, and orientation.
+This is a web app for analyzing the fiber structure of images, intended to be used with drumheads, developed for RIT FIP 2024-25. The app can be hosted locally by installing `streamlit`, or used through the web app at https://bobdiffusion.streamlit.app.
 
-# Coherence and angle calculation explained
+# parameters
+1. **Downscale**
+    This is the factor by which the dimensions of the input image will be multiplied by, for an interpolated downscale. Leave 1 for no downscale.
+
+2. **Coherence gamma**
+    This is the exponent for $coherence_{scaled} = coherence^{\gamma}$. This allows for emphasis on larger coherence values.
+
+3. **Histogram blur sigma**
+    This is the standard deviation for a gaussian blur on the histogram - leave 0 for no blur
+
+4. **Sigma to ydim ratio**
+    This is used for the "outer scale" of structure tensor calculation - specifically used for the standard deviation of image gradient calculation via Derivative of Gaussian filter. If the value chosen results in a stdev below ~.5px, the processing will not work as intended.
+    If an outer scale in units of length is desired, use the formula: $$Ratio_\sigma = \frac{\sigma \,\text{[length]}}{y \,\text{[length]}}$$
+
+5. **Inner sigma**
+    This is the standard deviation of the "inner scale" blur, which allows for a selection of desired spatial frequency range. Smaller values will keep high-frequency information, while larger values will shift emphasis to lower-frequency information.
+
+6. **epsilon**
+    This is used during the coherence calculation: $$coherence = (\frac{\lambda_1 + \lambda_2}{\lambda_1 - \lambda_2 + \epsilon})^2$$ Values near zero result in numerical instabilities for near-constant regions, where both eigenvectors of the structure tensor are small. Additionally, unusually large values (eg. 0.01) may result in a desirable attenuation of low-coherence regions for fiber analysis.
+
+7. **num_bins**
+    This is the number of bins for the coherence-weighted angle histogram, more bins will result in a higher-resolution histogram, while less bins will speed up compute time.
+
+<!-- # Coherence and angle calculation explained
 1. calculate x and y gradient with gradient filter - add menu to choose type of computation and sigma (if applicable)
 
 2. calculate structure tensor from x and y gradient
@@ -51,4 +74,4 @@ Using the coherence calculation already implemented, I want to investigate using
 TODO:
 1. make ipynb for testing out bilateral filter
 2. make functions in modules.py for arbitrary filters
-3. for useful filters, find more efficient implementation
+3. for useful filters, find more efficient implementation -->
