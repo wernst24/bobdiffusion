@@ -88,8 +88,8 @@ with col2:
         coh, ang = coh_ang_calc(
             raw_image_gray,
             st.session_state.sigma_to_ydim_ratio,
-            st.session_state.innerSigma,
-            st.session_state.epsilon,
+            st.session_state.innerSigma_to_ydim_ratio,
+            st.session_state.epsilon / raw_image_gray.shape[0] / raw_image_gray.shape[0],
         )  # this is the important bit
 
         coh_gammaified = np.power(coh, st.session_state.coherence_gamma)

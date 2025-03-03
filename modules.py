@@ -17,7 +17,7 @@ def ddx_gaussian_convolve(
     return ndi.gaussian_filter(
         image, sigma, order=(0, 1), truncate=truncate, mode="reflect"
     ), ndi.gaussian_filter(
-        image, sigma, order=(1, 0), truncate=truncate, mode="wrap"
+        image, sigma, order=(1, 0), truncate=truncate, mode="reflect"
     )  # ix, iy
 
 
@@ -45,17 +45,18 @@ def kval_gaussian(k_20_re, k_20_im, k_11, sigma):
 
 
 @st.cache_data
-def coh_ang_calc(image, sigma_to_ydim_ratio, sigma_inner=2, epsilon=1e-3):
+def coh_ang_calc(image, sigma_to_ydim_ratio, innerSigma_to_ydim_ratio, epsilon=1e-3):
     # image: 2d grayscale image, perchance already mean downscaled a bit
     # sigma_outer: sigma for gradient detection
     # sigma_inner: sigma controlling bandwidth of angles detected
     # epsilon: prevent div0 error for coherence
     # kernel_radius: kernel size for gaussians - kernel will be 2*kernel_radius + 1 wide
 
+    
     k_20_re, k_20_im, k_11 = structure_tensor_calc(image, sigma_to_ydim_ratio)
 
     # this is sampling local area with w(p)
-    k_20_re, k_20_im, k_11 = kval_gaussian(k_20_re, k_20_im, k_11, sigma_inner)
+    k_20_re, k_20_im, k_11 = kval_gaussian(k_20_re, k_20_im, k_11, innerSigma_to_ydim_ratio*image.shape[0])
 
     # return coherence (|k_20|/k_11), orientation (angle of k_20)
     return (k_20_re**2 + k_20_im**2) / (k_11 + epsilon) ** 2, np.arctan2(

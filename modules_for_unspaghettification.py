@@ -67,21 +67,21 @@ def collect_params_from_user():
         format="%.6f",
     )
 
-    st.session_state.innerSigma = st.number_input(
-        value=1.0,
-        min_value=0.01,
-        max_value=10.0,
+    st.session_state.innerSigma_to_ydim_ratio = st.number_input(
+        value=0.001,
+        min_value=0.0000001,
+        max_value=100.0,
         step=0.0,
-        label="inner sigma",
+        label="innerSigma to ydim ratio",
         format="%.6f",
     )
 
     st.session_state.epsilon = st.number_input(
-        value=1e-8,
-        min_value=1e-8,
-        max_value=1.0,
+        value=1.0,
+        min_value=1e-3,
+        max_value=100.0,
         step=-1.0,
-        label="epsilon",
+        label="epsilon (to be divided by (ydim^2) for scale invariance)",
         format="%.6f",
     )
 
