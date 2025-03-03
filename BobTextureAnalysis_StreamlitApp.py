@@ -44,7 +44,7 @@ with col1:
         )
 
         if "opencv_image" not in st.session_state:
-            st.session_state.raw_image_gray = None
+            st.session_state.raw_image_gray = np.zeros((100, 100))
 
         # Reading image if it has been uploaded
         if uploaded_image is not None:
@@ -93,10 +93,7 @@ with col2:
             / raw_image_gray.shape[0],
         )  # this is the important bit
 
-        coh_gammaified = np.power(coh, st.session_state.coherence_gamma)
-        weighted_hist = weightedHistogram(
-            coh_gammaified, ang, st.session_state.num_bins
-        )
+        weighted_hist = weightedHistogram(coh, ang, st.session_state.num_bins)
         blurred_histogram = (
             gaussian_filter1d(
                 weighted_hist, sigma=st.session_state.histogram_blur_sigma, mode="wrap"

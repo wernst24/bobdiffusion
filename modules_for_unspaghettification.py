@@ -30,7 +30,8 @@ def plot_angle_histogram(weighted_hist, sigma):
     )
     ax.set_title("Coherence-Weighted Histogram of Angles")
     ax.set_ylabel("Sum of coherence (roughly counts)")
-    ax.set_xlabel("Angle [deg] - 0 vertical, increasing CCW")
+    ax.set_xlabel("Angle [deg] - 0 vertical, increasing CW")
+    plt.xticks([0, 45, 90, 135, 180])
     st.pyplot(fig)
 
 
@@ -38,14 +39,14 @@ def collect_params_from_user():
     st.write("Parameters for coherence/angle calculation & display")
     # These don't need checking for NaN, because they have default values
     # st.session_state.ksize = st.number_input(value=1, min_value=1, max_value=51, step=2, label="kernel diameter")
-    st.session_state.coherence_gamma = st.number_input(
-        value=1.0,
-        min_value=0.5,
-        max_value=4.0,
-        step=0.0,
-        label="coherence gamma",
-        format="%.6f",
-    )
+    # st.session_state.coherence_gamma = st.number_input(
+    #     value=1.0,
+    #     min_value=0.5,
+    #     max_value=4.0,
+    #     step=0.0,
+    #     label="coherence gamma",
+    #     format="%.6f",
+    # )
 
     st.session_state.histogram_blur_sigma = st.number_input(
         value=0.0,
