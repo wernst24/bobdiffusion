@@ -1,5 +1,3 @@
-# yank all the repeated display stuff, input processing, basically everything
-
 import streamlit as st
 import cv2 as cv
 import numpy as np
@@ -59,19 +57,17 @@ def collect_params_from_user():
     )
 
     st.session_state.sigma_to_ydim_ratio = st.number_input(
-        value=0.001,
-        min_value=0.0000001,
-        max_value=100.0,
-        step=0.0,
-        label="sigma to ydim ratio",
+        value=4.0 / st.session_state.raw_image_gray.shape[0],
+        min_value=0.25 / st.session_state.raw_image_gray.shape[0],
+        max_value=100 / st.session_state.raw_image_gray.shape[0],
+        label="outerSigma to ydim ratio",
         format="%.6f",
     )
 
     st.session_state.innerSigma_to_ydim_ratio = st.number_input(
-        value=0.001,
-        min_value=0.0000001,
-        max_value=100.0,
-        step=0.0,
+        value=4.0 / st.session_state.raw_image_gray.shape[0],
+        min_value=0.25 / st.session_state.raw_image_gray.shape[0],
+        max_value=100 / st.session_state.raw_image_gray.shape[0],
         label="innerSigma to ydim ratio",
         format="%.6f",
     )

@@ -7,7 +7,7 @@ import scipy.ndimage as ndi
 
 
 def ddx_gaussian_convolve(
-    image: np.ndarray, sigma=-1, sigma_to_ydim_ratio=-1, truncate=3, mode="l2"
+    image: np.ndarray, sigma=-1, sigma_to_ydim_ratio=-1, truncate=3
 ):
     if sigma == -1:
         if sigma_to_ydim_ratio == -1:
@@ -15,10 +15,8 @@ def ddx_gaussian_convolve(
         else:
             sigma = image.shape[0] * sigma_to_ydim_ratio
     return ndi.gaussian_filter(
-        image, sigma, order=(0, 1), truncate=truncate, mode="reflect"
-    ), ndi.gaussian_filter(
-        image, sigma, order=(1, 0), truncate=truncate, mode="reflect"
-    )  # ix, iy
+        image, sigma, order=(0, 1), truncate=truncate
+    ), ndi.gaussian_filter(image, sigma, order=(1, 0), truncate=truncate)  # ix, iy
 
 
 @st.cache_data
@@ -52,11 +50,12 @@ def coh_ang_calc(image, sigma_to_ydim_ratio, innerSigma_to_ydim_ratio, epsilon=1
     # epsilon: prevent div0 error for coherence
     # kernel_radius: kernel size for gaussians - kernel will be 2*kernel_radius + 1 wide
 
-    
     k_20_re, k_20_im, k_11 = structure_tensor_calc(image, sigma_to_ydim_ratio)
 
     # this is sampling local area with w(p)
-    k_20_re, k_20_im, k_11 = kval_gaussian(k_20_re, k_20_im, k_11, innerSigma_to_ydim_ratio*image.shape[0])
+    k_20_re, k_20_im, k_11 = kval_gaussian(
+        k_20_re, k_20_im, k_11, innerSigma_to_ydim_ratio * image.shape[0]
+    )
 
     # return coherence (|k_20|/k_11), orientation (angle of k_20)
     return (k_20_re**2 + k_20_im**2) / (k_11 + epsilon) ** 2, np.arctan2(

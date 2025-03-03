@@ -68,7 +68,6 @@ with col1:
             submit_button_2 = st.form_submit_button("Confirm options")
 
 
-
 # col2 should be for visualizing processed images, and should have everything update live.
 # Add dropdown menu for which layers to view: intensity, angle, and coherence - done
 with col2:
@@ -89,7 +88,9 @@ with col2:
             raw_image_gray,
             st.session_state.sigma_to_ydim_ratio,
             st.session_state.innerSigma_to_ydim_ratio,
-            st.session_state.epsilon / raw_image_gray.shape[0] / raw_image_gray.shape[0],
+            st.session_state.epsilon
+            / raw_image_gray.shape[0]
+            / raw_image_gray.shape[0],
         )  # this is the important bit
 
         coh_gammaified = np.power(coh, st.session_state.coherence_gamma)
