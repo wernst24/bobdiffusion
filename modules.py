@@ -26,8 +26,8 @@ def structure_tensor_calc(image, sigma_to_ydim_ratio):
     )
 
     # structure tensor
-    mu_20 = I_x**2
-    mu_02 = I_y**2
+    mu_20 = I_x * I_x
+    mu_02 = I_y * I_y
 
     # k_20_real, k_20_im, k_11
     return mu_20 - mu_02, 2 * I_x * I_y, mu_20 + mu_02
@@ -58,7 +58,7 @@ def coh_ang_calc(image, sigma_to_ydim_ratio, innerSigma_to_ydim_ratio, epsilon=1
     )
 
     # return coherence (|k_20|/k_11), orientation (angle of k_20)
-    return (k_20_re**2 + k_20_im**2) / (k_11 + epsilon) ** 2, np.arctan2(
+    return (k_20_re * k_20_re + k_20_im * k_20_im) / ((k_11 + epsilon) * (k_11 + epsilon)), np.arctan2(
         k_20_im, k_20_re
     )
 
