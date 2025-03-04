@@ -48,6 +48,9 @@ def collect_params_from_user():
     #     format="%.6f",
     # )
 
+
+
+    # note: doesn't allow for ultra precise or really small sigma values - sometimes sub-pixel
     st.session_state.histogram_blur_sigma = st.number_input(
         value=0.0,
         min_value=0.0,
@@ -58,17 +61,32 @@ def collect_params_from_user():
     )
 
     st.session_state.sigma_to_ydim_ratio = st.number_input(
+
+
         value=4.0 / st.session_state.raw_image_gray.shape[0],
         min_value=0.25 / st.session_state.raw_image_gray.shape[0],
         max_value=100 / st.session_state.raw_image_gray.shape[0],
+
+
         label="outerSigma to ydim ratio",
         format="%.6f",
     )
 
+    """
+    # old input for sigma value
     st.session_state.innerSigma_to_ydim_ratio = st.number_input(
         value=4.0 / st.session_state.raw_image_gray.shape[0],
         min_value=0.25 / st.session_state.raw_image_gray.shape[0],
         max_value=100 / st.session_state.raw_image_gray.shape[0],
+        label="innerSigma to ydim ratio",
+        format="%.6f",
+    )
+    """
+
+    st.session_state.innerSigma_to_ydim_ratio = st.number_input(
+        value=4.0 / st.session_state.raw_image_gray.shape[0],
+        min_value=0.25 / st.session_state.raw_image_gray.shape[0],
+        max_value=100.0 / st.session_state.raw_image_gray.shape[0],
         label="innerSigma to ydim ratio",
         format="%.6f",
     )
