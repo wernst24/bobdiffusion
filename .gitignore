@@ -4,3 +4,7 @@
 env/*
 .env
 /__pycache__/*
+./synth_scans/
+./real_scans/
+*.tif
+test.ipynb

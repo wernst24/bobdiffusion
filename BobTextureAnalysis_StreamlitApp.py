@@ -27,7 +27,7 @@ st.set_page_config(
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("# weighted histogram")
+    # st.markdown("# weighted histogram")
 
     with st.form("form1", enter_to_submit=False, clear_on_submit=False):
         # upload and get rescale factor
@@ -113,11 +113,11 @@ with col2:
         display_selected_falsecolor(
             raw_image_gray, coh, ang, mode=imageToDisplay, blockreduce=blockreduce
         )
-        st.text(
-            "outer sigma in pixels: "
-            + str(st.session_state.sigma_to_ydim_ratio * raw_image_gray.shape[0])
-            + (" (should be at least .5px)")
-        )
+        # st.text(
+        #     "outer sigma in pixels: "
+        #     + str(st.session_state.sigma_to_ydim_ratio * raw_image_gray.shape[0])
+        #     + (" (should be at least .5px)")
+        # )
 
         plot_angle_histogram(blurred_histogram, st.session_state.histogram_blur_sigma)
         file_name = st.text_input(

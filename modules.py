@@ -2,7 +2,8 @@
 import cv2 as cv
 import numpy as np
 from skimage.filters import gaussian
-import streamlit as st
+
+# import streamlit as st
 import scipy.ndimage as ndi
 
 
@@ -19,7 +20,7 @@ def ddx_gaussian_convolve(
     ), ndi.gaussian_filter(image, sigma, order=(1, 0), truncate=truncate)  # ix, iy
 
 
-@st.cache_data
+# @st.cache_data
 def structure_tensor_calc(image, sigma_to_ydim_ratio):
     I_x, I_y = ddx_gaussian_convolve(
         image, sigma_to_ydim_ratio=sigma_to_ydim_ratio, truncate=2
@@ -42,7 +43,7 @@ def kval_gaussian(k_20_re, k_20_im, k_11, sigma):
     )
 
 
-@st.cache_data
+# @st.cache_data
 def coh_ang_calc(image, sigma_to_ydim_ratio, innerSigma_to_ydim_ratio, epsilon=1e-3):
     # image: 2d grayscale image, perchance already mean downscaled a bit
     # sigma_outer: sigma for gradient detection
@@ -58,13 +59,13 @@ def coh_ang_calc(image, sigma_to_ydim_ratio, innerSigma_to_ydim_ratio, epsilon=1
     )
 
     # return coherence (|k_20|/k_11), orientation (angle of k_20)
-    return (k_20_re * k_20_re + k_20_im * k_20_im) / ((k_11 + epsilon) * (k_11 + epsilon)), np.arctan2(
-        k_20_im, k_20_re
-    )
+    return (k_20_re * k_20_re + k_20_im * k_20_im) / (
+        (k_11 + epsilon) * (k_11 + epsilon)
+    ), np.arctan2(k_20_im, k_20_re)
 
 
 # get rbg of image, coherence, and angle
-@st.cache_data
+# @st.cache_data
 def orient_hsv(
     image, coherence_image, angle_img, mode="all", angle_phase=0, invert=False
 ):
@@ -103,7 +104,7 @@ def orient_hsv(
     return cv.cvtColor((hsv_image * 255).astype(np.uint8), cv.COLOR_HSV2RGB)
 
 
-@st.cache_data
+# @st.cache_data
 def weightedHistogram(coh, ang, num_bins):
     bin_width = np.pi * 2 / num_bins
     # print(bin_width)
