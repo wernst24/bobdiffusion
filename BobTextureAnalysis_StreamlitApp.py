@@ -1,13 +1,9 @@
 from modules import coh_ang_calc, weightedHistogram, orient_hsv
-from modules_for_unspaghettification import (
-    read_image_to_opencv,
-    display_selected_falsecolor,
-)
+from modules_for_unspaghettification import read_image_to_opencv
 import streamlit as st
 import numpy as np
 
 import sys
-from scipy.ndimage import gaussian_filter1d
 
 sys.dont_write_bytecode = True
 sys.tracebacklimit = 0
@@ -46,9 +42,8 @@ with col1:
     st.write("Input image (grayscale)")
     if st.session_state.raw_image_gray is not None:
         st.image(st.session_state.raw_image_gray, use_container_width=False)
+    st.write(f"Shape: {st.session_state.raw_image_gray.shape}")
 
-# col2 should be for visualizing processed images, and should have everything update live.
-# Add dropdown menu for which layers to view: intensity, angle, and coherence - done
 with col2:
 
     if st.session_state.raw_image_gray is not None:

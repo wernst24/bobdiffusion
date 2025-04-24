@@ -1,3 +1,4 @@
+# Note: should only output histogram
 from modules import coh_ang_calc
 import os
 import cv2 as cv
@@ -36,9 +37,10 @@ for i, file in enumerate(os.listdir()):
     
     coh, ang = coh_ang_calc(img, sigma_outer, sigma_inner, epsilon)
     print(coh.dtype)
+    
     # print(f'img min: {img.min()}, img max: {img.max()}')
-    cv.imwrite(coh_filepath, coh[:-4] + ".jpg")
-    cv.imwrite(ang_filepath, ang[:-4] + ".jpg")
+    # cv.imwrite(coh_filepath, coh[:-4] + ".jpg")
+    # cv.imwrite(ang_filepath, ang[:-4] + ".jpg")
     
     print(f"File {i}: {file} \t coherence & angle written")
     # img = rescale(img, 0.1)

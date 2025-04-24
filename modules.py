@@ -1,10 +1,10 @@
 # necessary imports
-import cv2 as cv
+from cv2 import cvtColor, COLOR_HSV2RGB
 import numpy as np
 from skimage.filters import gaussian
 
 # import streamlit as st
-import scipy.ndimage as ndi
+from scipy.ndimage import gaussian_filter
 
 
 def ddx_gaussian_convolve(
@@ -15,12 +15,11 @@ def ddx_gaussian_convolve(
             sigma = 1
         else:
             sigma = image.shape[0] * sigma_to_ydim_ratio
-    return ndi.gaussian_filter(
+    return gaussian_filter(
         image, sigma, order=(0, 1), truncate=truncate
-    ), ndi.gaussian_filter(image, sigma, order=(1, 0), truncate=truncate)  # ix, iy
+    ), gaussian_filter(image, sigma, order=(1, 0), truncate=truncate)  # ix, iy
 
 
-# @st.cache_data
 def structure_tensor_calc(image, sigma_to_ydim_ratio):
     I_x, I_y = ddx_gaussian_convolve(
         image, sigma_to_ydim_ratio=sigma_to_ydim_ratio, truncate=2
@@ -43,7 +42,6 @@ def kval_gaussian(k_20_re, k_20_im, k_11, sigma):
     )
 
 
-# @st.cache_data
 def coh_ang_calc(image, sigma_to_ydim_ratio, innerSigma_to_ydim_ratio, epsilon=1e-3):
     # image: 2d grayscale image, perchance already mean downscaled a bit
     # sigma_outer: sigma for gradient detection
@@ -64,8 +62,6 @@ def coh_ang_calc(image, sigma_to_ydim_ratio, innerSigma_to_ydim_ratio, epsilon=1
     ), np.arctan2(k_20_im, k_20_re)
 
 
-# get rbg of image, coherence, and angle
-# @st.cache_data
 def orient_hsv(
     image, coherence_image, angle_img, mode="all", angle_phase=0, invert=False
 ):
@@ -101,10 +97,9 @@ def orient_hsv(
     else:
         assert False, "Invalid mode"
 
-    return cv.cvtColor((hsv_image * 255).astype(np.uint8), cv.COLOR_HSV2RGB)
+    return cvtColor((hsv_image * 255).astype(np.uint8), COLOR_HSV2RGB)
 
 
-# @st.cache_data
 def weightedHistogram(coh, ang, num_bins):
     bin_width = np.pi * 2 / num_bins
     # print(bin_width)
@@ -119,34 +114,3 @@ def weightedHistogram(coh, ang, num_bins):
     hist = np.zeros((num_bins))
     np.add.at(hist, flat[:, 1].astype(np.int16), flat[:, 0])
     return hist
-
-
-def downscale_coh_ang(coherence, angle, k):
-    (h, w) = coherence.shape
-    h_small = h // k
-    w_small = w // k
-
-    coherence_clipped = coherence[: h_small * k, : w_small * k]
-    angle_clipped = angle[: h_small * k, : w_small * k]
-
-    coherence_small = coherence_clipped.reshape(h_small, k, w_small, k).mean(
-        axis=(1, 3)
-    )
-
-    angle_reshaped = angle_clipped.reshape(h_small, k, w_small, k)
-
-    max_col_indices = (
-        coherence_clipped.reshape(h_small, k, w_small, k).max(axis=1).argmax(axis=2)
-    )  # shape (h_small, k, w_small)
-    max_row_indices = (
-        coherence_clipped.reshape(h_small, k, w_small, k).max(axis=3).argmax(axis=1)
-    )
-
-    angle_small = angle_reshaped[
-        np.arange(h_small)[:, None],
-        max_row_indices,
-        np.arange(w_small),
-        max_col_indices,
-    ]
-
-    return coherence_small, angle_small
