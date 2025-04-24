@@ -12,7 +12,8 @@ def read_image_to_opencv(uploaded_image, rescale_factor):
     image_bytes = np.asarray(bytearray(uploaded_image.read()), dtype=np.uint8)
     cv_image = cv.imdecode(image_bytes, 1)
     cv_image_gray = color.rgb2gray(cv_image)
-    return transform.rescale(cv_image_gray, rescale_factor, anti_aliasing=True)
+    # return transform.rescale(cv_image_gray, rescale_factor, anti_aliasing=True)
+    return transform.resize(cv_image_gray, (200, 200))
 
 def display_selected_falsecolor(
     raw_image, coherence, angle, mode="Intensity, Coherence, and Angle", blockreduce=1
