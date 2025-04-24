@@ -10,7 +10,7 @@ sys.tracebacklimit = 0
 
 
 st.set_page_config(
-    page_title="BobHistogram",
+    page_title="BobTextureAnalysis",
     page_icon="🔬",
     layout="wide",
 )
@@ -26,13 +26,14 @@ if st.session_state.synthetic_drumhead != 0:
     verdict2 = "Synthetic" if st.session_state.synthetic_drumhead == 2 else "Natural"
 
 with col1:
+    st.markdown("# Synthetic/Natural Comparison\nUpload one image each of a natural and synthetic drumhead. Make sure the sample covers the entire frame; edges will mess with the algorithm.")
     col1a, col1b = st.columns(2)
     with col1a:
         # st.markdown("# weighted histogram")
 
         with st.form("form1", enter_to_submit=False, clear_on_submit=False):
             # upload and get rescale factor
-            msg = "Upload first image for comparison"
+            msg = "Upload first image for comparison, and click \"Analyze image\""
             uploaded_image1 = st.file_uploader(
                 msg, type=["tif", "tiff", "png", "jpg", "jpeg"], accept_multiple_files=False
             )
@@ -53,7 +54,7 @@ with col1:
     with col1b:
         with st.form("form2", enter_to_submit=False, clear_on_submit=False):
             # upload and get rescale factor
-            msg = "Upload second image for comparison"
+            msg = "Upload second image for comparison, and click \"Analyze image\""
             uploaded_image2 = st.file_uploader(
                 msg, type=["tif", "tiff", "png", "jpg", "jpeg"], accept_multiple_files=False
             )
