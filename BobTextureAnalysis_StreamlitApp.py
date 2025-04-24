@@ -106,8 +106,8 @@ with col2:
         weighted_hist1 = weightedHistogram(coh1, ang1, num_bins)
         weighted_hist2 = weightedHistogram(coh2, ang2, num_bins)
 
-        normalized_hist1 = weighted_hist1 / weighted_hist1.sum()
-        normalized_hist2 = weighted_hist2 / weighted_hist2.sum()
+        normalized_hist1 = weighted_hist1 / (weighted_hist1.sum() + 1e-8)
+        normalized_hist2 = weighted_hist2 / (weighted_hist2.sum() + 1e-8)
         varx1 = 0.0
         vary1 = 0.0
         varx2 = 0.0
