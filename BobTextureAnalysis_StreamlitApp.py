@@ -38,7 +38,7 @@ with col1:
         # Reading image if it has been uploaded
         if uploaded_image is not None:
             st.session_state.raw_image_gray = read_image_to_opencv(
-                uploaded_image, rescale_factor
+                uploaded_image, 0.1
             )
 
         submit_button = st.form_submit_button("Analyze image")
